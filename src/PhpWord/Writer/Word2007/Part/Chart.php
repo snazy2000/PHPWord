@@ -154,7 +154,7 @@ class Chart extends AbstractPart
 
         //Chart legend
         if ($showLegend) {
-            $xmlWriter->writeRaw('<c:legend><c:legendPos val="r"/></c:legend>');
+            $xmlWriter->writeRaw('<c:legend><c:legendPos val="' .  $style->getLegendPosition() . '"/><c:overlay val="0" /></c:legend>');
         }
 
         $xmlWriter->startElement('c:plotArea');

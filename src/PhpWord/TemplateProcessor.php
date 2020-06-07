@@ -346,6 +346,48 @@ class TemplateProcessor
         }
     }
 
+    /**
+     * @param string $search
+     * @param \PhpOffice\PhpWord\Element\AbstractElement $chart
+     */
+    public function setChart($search, \PhpOffice\PhpWord\Element\AbstractElement $chart)
+    {
+        $elementName = substr(get_class($chart), strrpos(get_class($chart), '\\') + 1);
+        $objectClass = 'PhpOffice\\PhpWord\\Writer\\Word2007\\Element\\' . $elementName;
+
+        // Get the next relation id
+        $rId= $this->getNextRelationsIndex($this->getMainPartName());
+        $chart->setRelationId($rId);
+
+        // Define the chart filename
+        $filename = "charts/chart{$rId}.xml";
+
+        // Get the part writer
+        $writerPart = new \PhpOffice\PhpWord\Writer\Word2007\Part\Chart();
+        $writerPart->setElement($chart);
+
+        // ContentTypes.xml
+        $this->zipClass->addFromString("word/{$filename}", $writerPart->write());
+
+        // Add the chart to relations
+        $relationTpl = '<Relationship Id="rId{RID}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="charts/chart{RID}.xml"/>';
+        $typeTpl = '<Override PartName="/word/{CHART}" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>';
+
+        $xmlChartRelation = str_replace(array('{RID}'), array($rId), $relationTpl);
+        $xmlChartType = str_replace(array('{CHART}'), array($filename), $typeTpl);
+
+        $this->tempDocumentContentTypes = str_replace('</Types>', $xmlChartType, $this->tempDocumentContentTypes) . '</Types>';
+        $this->tempDocumentRelations[$this->getMainPartName()] = str_replace('</Relationships>', $xmlChartRelation, $this->tempDocumentRelations[$this->getMainPartName()]) . '</Relationships>';
+
+        // Write the chart
+        $xmlWriter = new XMLWriter();
+        $elementWriter = new $objectClass($xmlWriter, $chart, true);
+        $elementWriter->write();
+
+        // Place it in the template
+        $this->replaceXmlBlock($search, "<w:p>" . $xmlWriter->getData() . "</w:p>", 'w:p');
+    }
+
     private function getImageArgs($varNameWithArgs)
     {
         $varElements = explode(':', $varNameWithArgs);

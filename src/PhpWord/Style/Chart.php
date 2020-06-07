@@ -102,6 +102,17 @@ class Chart extends AbstractStyle
     private $valueLabelPosition = 'nextTo';
 
     /**
+     * A string that tells the write where to write the legend on the chart
+     * "b" - Bottom of graph
+     * "l" - Left of graph
+     * "r" - Right of graph
+     * "t" - top of graph
+     * "tr" - top right of graph
+     * @var string
+     */
+    private $legendPosition = 'r';
+
+    /**
      * @var string
      */
     private $categoryAxisTitle;
@@ -281,6 +292,35 @@ class Chart extends AbstractStyle
     public function setShowLegend($value = false)
     {
         $this->showLegend = $value;
+
+        return $this;
+    }
+
+    /**
+     * Get the legendPosition setting
+     *
+     * @return string
+     */
+    public function getLegendPosition()
+    {
+        return $this->legendPosition;
+    }
+
+    /**
+     * Set the legendPosition setting
+     * "b" - Bottom of graph
+     * "l" - Left of graph
+     * "r" - Right of graph
+     * "t" - top of graph
+     * "tr" - top right of graph
+     *
+     * @param string
+     * @param mixed $legendPosition
+     */
+    public function setLegendPosition($legendPosition)
+    {
+        $enum = array('b', 'l', 'r', 't', 'tr');
+        $this->legendPosition = $this->setEnumVal($legendPosition, $enum, $this->legendPosition);
 
         return $this;
     }
